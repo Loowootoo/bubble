@@ -141,7 +141,7 @@ func (bubble *bubble) Draw(screen *ebiten.Image) {
 
 func loadBubbles(numBubbles int) []*bubble {
 	explosionTexture := loadFromFile("assets/explosion.png")
-	bubbleStrs := []string{"assets/balloon_blue.png", "assets/balloon_green.png", "assets/balloon_red.png"}
+	bubbleStrs := []string{"assets/bluecircle.png", "assets/greencircle.png", "assets/yellowcircle.png"}
 	bubbleTextures := make([]*ebiten.Image, len(bubbleStrs))
 
 	for i, bstr := range bubbleStrs {
