@@ -102,25 +102,25 @@ func newBubble(tex *ebiten.Image, pos, dir vector.Vector, explosionTexture *ebit
 	return &bubble{tex, pos, dir, w, h, false, false, 0, 50.0, explosionTexture}
 }
 
-func (bubble *bubble) getScale() float64 {
+func (bubble *bubble) getScale() float32 {
 	return (bubble.pos.Z/200 + 1) / 2
 }
 
-func (bubble *bubble) getCircle() (x, y, r float64) {
+func (bubble *bubble) getCircle() (x, y, r float32) {
 	x = bubble.pos.X
-	y = bubble.pos.Y - 30*bubble.getScale()
-	r = float64(bubble.w) / 2 * bubble.getScale()
+	y = bubble.pos.Y
+	r = float32(bubble.w) / 2 * bubble.getScale()
 	return x, y, r
 }
 
 func (bubble *bubble) Draw(screen *ebiten.Image) {
-	scale := float64(bubble.getScale())
-	newW := int32(float64(bubble.w) * scale)
-	newH := int32(float64(bubble.h) * scale)
-	x := float64(bubble.pos.X - float64(newW)/2)
-	y := float64(bubble.pos.Y - float64(newH)/2)
+	scale := bubble.getScale()
+	newW := int32(float32(bubble.w) * scale)
+	newH := int32(float32(bubble.h) * scale)
+	x := float64(bubble.pos.X - float32(newW)/2)
+	y := float64(bubble.pos.Y - float32(newH)/2)
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(scale, scale)
+	op.GeoM.Scale(float64(scale), float64(scale))
 	op.GeoM.Translate(x, y)
 	screen.DrawImage(bubble.tex, op)
 
@@ -133,7 +133,7 @@ func (bubble *bubble) Draw(screen *ebiten.Image) {
 		rect := image.Rect(int(animationX), int(animationY), animationX+64, animationY+64)
 		op.GeoM.Reset()
 		op.SourceRect = &rect
-		op.GeoM.Scale(2, 2)
+		op.GeoM.Scale(float64(scale), float64(scale))
 		op.GeoM.Translate(x, y)
 		screen.DrawImage(bubble.explosionTexture, op)
 	}
@@ -150,8 +150,8 @@ func loadBubbles(numBubbles int) []*bubble {
 	bubbles := make([]*bubble, numBubbles)
 	for i := range bubbles {
 		tex := bubbleTextures[i%8]
-		pos := vector.Vector{X: rand.Float64() * float64(WinWidth), Y: rand.Float64() * float64(WinHeight), Z: rand.Float64() * float64(WinDepth)}
-		dir := vector.Vector{X: rand.Float64()*.5 - .25, Y: rand.Float64()*.5 - .25, Z: rand.Float64() * .25}
+		pos := vector.Vector{X: rand.Float32() * float32(WinWidth), Y: rand.Float32() * float32(WinHeight), Z: rand.Float32() * float32(WinDepth)}
+		dir := vector.Vector{X: rand.Float32()*.5 - .25, Y: rand.Float32()*.5 - .25, Z: rand.Float32() * .25}
 		bubbles[i] = newBubble(tex, pos, dir, explosionTexture)
 	}
 	return bubbles
@@ -165,7 +165,7 @@ func (ui *UI2d) DrawBackground(screen *ebiten.Image) {
 
 func (ui *UI2d) TextOut(screen *ebiten.Image, str string, x, y int, clr color.Color) {
 	// Draw the sample text
-	text.Draw(screen, str, ui.normalFont, x, y, clr)
+	text.Draw(screen, str, ui.bigFont, x, y, clr)
 }
 
 func (ui *UI2d) UpdateBubbles(elapsedTime float64) {
@@ -187,26 +187,26 @@ func (ui *UI2d) UpdateBubbles(elapsedTime float64) {
 		if !bubbleClicked && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 			x, y, r := bubble.getCircle()
 			mouseX, mouseY := ebiten.CursorPosition()
-			xDiff := float64(mouseX) - x
-			yDiff := float64(mouseY) - y
-			dist := math.Sqrt(float64(xDiff*xDiff + yDiff*yDiff))
+			xDiff := float32(mouseX) - x
+			yDiff := float32(mouseY) - y
+			dist := float32(math.Sqrt(float64(xDiff*xDiff + yDiff*yDiff)))
 			if dist < r {
 				bubbleClicked = true
 				bubble.exploding = true
 				bubble.explosionCount = 0
 			}
 		}
-		p := vector.Add(bubble.pos, vector.Mult(bubble.dir, elapsedTime))
-		if p.X < 0 || p.X > float64(WinWidth) {
+		p := bubble.pos.Add(bubble.dir.Mul2(float32(elapsedTime)))
+		if p.X < 0 || p.X > float32(WinWidth) {
 			bubble.dir.X = -bubble.dir.X
 		}
-		if p.Y < 0 || p.Y > float64(WinHeight) {
+		if p.Y < 0 || p.Y > float32(WinHeight) {
 			bubble.dir.Y = -bubble.dir.Y
 		}
-		if p.Z < 0 || p.Z > float64(WinDepth) {
+		if p.Z < 0 || p.Z > float32(WinDepth) {
 			bubble.dir.Z = -bubble.dir.Z
 		}
-		bubble.pos = vector.Add(bubble.pos, vector.Mult(bubble.dir, elapsedTime))
+		bubble.pos = bubble.pos.Add(bubble.dir.Mul2(float32(elapsedTime)))
 	}
 	if bubbleExploded {
 		filteredBubbles := ui.Bubbles[0:0]

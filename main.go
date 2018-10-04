@@ -43,7 +43,7 @@ func update(screen *ebiten.Image) error {
 	}
 	ui.DrawBackground(screen)
 	for i, line := range strings.Split(sampleText, "\n") {
-		ui.TextOut(screen, line, 10, 40+i*20, color.White)
+		ui.TextOut(screen, line, 10, 40+i*30, color.White)
 	}
 	for _, bubble := range ui.Bubbles {
 		bubble.Draw(screen)
