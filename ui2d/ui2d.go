@@ -141,7 +141,7 @@ func (bubble *bubble) Draw(screen *ebiten.Image) {
 
 func loadBubbles(numBubbles int) []*bubble {
 	explosionTexture := loadFromFile("assets/explosion.png")
-	bubbleStrs := []string{"assets/bluecircle.png", "assets/greencircle.png", "assets/yellowcircle.png"}
+	bubbleStrs := []string{"assets/mm_blue.png", "assets/mm_brown.png", "assets/mm_green.png", "assets/mm_orange.png", "assets/mm_purple.png", "assets/mm_red.png", "assets/mm_teal.png", "assets/mm_yellow.png"}
 	bubbleTextures := make([]*ebiten.Image, len(bubbleStrs))
 
 	for i, bstr := range bubbleStrs {
@@ -149,7 +149,7 @@ func loadBubbles(numBubbles int) []*bubble {
 	}
 	bubbles := make([]*bubble, numBubbles)
 	for i := range bubbles {
-		tex := bubbleTextures[i%3]
+		tex := bubbleTextures[i%8]
 		pos := vector.Vector{X: rand.Float64() * float64(WinWidth), Y: rand.Float64() * float64(WinHeight), Z: rand.Float64() * float64(WinDepth)}
 		dir := vector.Vector{X: rand.Float64()*.5 - .25, Y: rand.Float64()*.5 - .25, Z: rand.Float64() * .25}
 		bubbles[i] = newBubble(tex, pos, dir, explosionTexture)
