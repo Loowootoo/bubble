@@ -8,7 +8,7 @@ import (
 type Vector struct {
 	X, Y, Z float32
 }
-
+//向量常數值
 var (
 	Zero     = Vector{0, 0, 0}
 	Up       = Vector{0, 1, 0}

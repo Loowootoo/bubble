@@ -30,6 +30,18 @@ var (
 呼兒將出換美酒，與爾同銷萬古愁！
 `
 )
+var (
+	waterText = `
+明月幾時有，把酒問青天。
+不知天上宮闕，今夕是何年。
+我欲乘風歸去，又恐瓊樓玉宇，高處不勝寒。
+起舞弄清影，何似在人間。
+轉朱閣，低綺戶，照無眠。
+不應有恨，何事長向別時圓。
+人有悲歡離合，月有陰晴圓缺，此事古難全。
+但願人長久，千里共嬋娟。	
+`
+)
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
@@ -42,8 +54,8 @@ func update(screen *ebiten.Image) error {
 		return nil
 	}
 	ui.DrawBackground(screen)
-	for i, line := range strings.Split(sampleText, "\n") {
-		ui.TextOut(screen, line, 10, 40+i*30, color.White)
+	for i, line := range strings.Split(waterText, "\n") {
+		ui.DrawTextWithShadowCenter(screen, line, 10, 40+i*30, 1, color.White, int(ui2d.WinWidth))
 	}
 	for _, bubble := range ui.Bubbles {
 		bubble.Draw(screen)

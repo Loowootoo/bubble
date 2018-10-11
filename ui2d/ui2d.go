@@ -8,6 +8,7 @@ import (
 	"image/png"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
@@ -217,4 +218,35 @@ func (ui *UI2d) UpdateBubbles(elapsedTime float64) {
 		}
 		ui.Bubbles = filteredBubbles
 	}
+}
+
+func (ui *UI2d) textWidth(str string) int {
+	b, _ := font.BoundString(ui.normalFont, str)
+	return (b.Max.X - b.Min.X).Ceil()
+}
+
+var (
+	shadowColor  = color.NRGBA{0, 0, 0, 0x80}
+	fontBaseSize = 16
+)
+
+func (ui *UI2d) DrawTextWithShadow(rt *ebiten.Image, str string, x, y, scale int, clr color.Color) {
+	offsetY := fontBaseSize * scale
+	for _, line := range strings.Split(str, "\n") {
+		y += offsetY
+		text.Draw(rt, line, ui.normalFont, x+1, y+1, shadowColor)
+		text.Draw(rt, line, ui.normalFont, x, y, clr)
+	}
+}
+
+func (ui *UI2d) DrawTextWithShadowCenter(rt *ebiten.Image, str string, x, y, scale int, clr color.Color, width int) {
+	w := ui.textWidth(str) * scale
+	x += (width - w) / 2
+	ui.DrawTextWithShadow(rt, str, x, y, scale, clr)
+}
+
+func (ui *UI2d) DrawTextWithShadowRight(rt *ebiten.Image, str string, x, y, scale int, clr color.Color, width int) {
+	w := ui.textWidth(str) * scale
+	x += width - w
+	ui.DrawTextWithShadow(rt, str, x, y, scale, clr)
 }
