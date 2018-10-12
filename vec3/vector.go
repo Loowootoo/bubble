@@ -1,4 +1,4 @@
-package vector
+package vec3
 
 import (
 	"fmt"
@@ -8,6 +8,7 @@ import (
 type Vector struct {
 	X, Y, Z float32
 }
+
 //向量常數值
 var (
 	Zero     = Vector{0, 0, 0}
@@ -84,14 +85,6 @@ func (v *Vector) Div(vect Vector) Vector {
 	return Vector{v.X / vect.X, v.Y / vect.Y, v.Z / vect.Z}
 }
 
-/*
-func (v *Vector) Transform(transform Matrix) Vector {
-	return NewVector3(
-		(v.X*transform[0])+(v.Y*transform[4])+(v.Z*transform[8])+transform[12],
-		(v.X*transform[1])+(v.Y*transform[5])+(v.Z*transform[9])+transform[13],
-		(v.X*transform[2])+(v.Y*transform[6])+(v.Z*transform[10])+transform[14])
-}
-*/
 func (v *Vector) fixAngle() {
 	for v.X >= 360 {
 		v.X -= 360

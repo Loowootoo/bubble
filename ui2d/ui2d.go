@@ -2,7 +2,7 @@ package ui2d
 
 import (
 	"Loowootoo/bubble/assets/fonts"
-	"Loowootoo/bubble/vector"
+	"Loowootoo/bubble/vec3"
 	"image"
 	"image/color"
 	"image/png"
@@ -88,8 +88,8 @@ func NewUI2d() *UI2d {
 
 type bubble struct {
 	tex               *ebiten.Image
-	pos               vector.Vector
-	dir               vector.Vector
+	pos               vec3.Vector
+	dir               vec3.Vector
 	w, h              int
 	exploding         bool
 	exploded          bool
@@ -98,7 +98,7 @@ type bubble struct {
 	explosionTexture  *ebiten.Image
 }
 
-func newBubble(tex *ebiten.Image, pos, dir vector.Vector, explosionTexture *ebiten.Image) *bubble {
+func newBubble(tex *ebiten.Image, pos, dir vec3.Vector, explosionTexture *ebiten.Image) *bubble {
 	w, h := tex.Size()
 	return &bubble{tex, pos, dir, w, h, false, false, 0, 50.0, explosionTexture}
 }
@@ -151,8 +151,8 @@ func loadBubbles(numBubbles int) []*bubble {
 	bubbles := make([]*bubble, numBubbles)
 	for i := range bubbles {
 		tex := bubbleTextures[i%8]
-		pos := vector.Vector{X: rand.Float32() * float32(WinWidth), Y: rand.Float32() * float32(WinHeight), Z: rand.Float32() * float32(WinDepth)}
-		dir := vector.Vector{X: rand.Float32()*.5 - .25, Y: rand.Float32()*.5 - .25, Z: rand.Float32() * .25}
+		pos := vec3.Vector{X: rand.Float32() * float32(WinWidth), Y: rand.Float32() * float32(WinHeight), Z: rand.Float32() * float32(WinDepth)}
+		dir := vec3.Vector{X: rand.Float32()*.5 - .25, Y: rand.Float32()*.5 - .25, Z: rand.Float32() * .25}
 		bubbles[i] = newBubble(tex, pos, dir, explosionTexture)
 	}
 	return bubbles
