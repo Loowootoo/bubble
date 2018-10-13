@@ -3,7 +3,6 @@ package ui2d
 import (
 	"Loowootoo/bubble/assets/fonts"
 	"Loowootoo/bubble/vec3"
-	"image"
 	"image/color"
 	"image/png"
 	"log"
@@ -18,6 +17,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/text"
+	"github.com/ryosama/go-sprite"
 )
 
 const WinWidth, WinHeight, WinDepth int32 = 800, 600, 100
@@ -87,73 +87,62 @@ func NewUI2d() *UI2d {
 }
 
 type bubble struct {
-	tex               *ebiten.Image
-	pos               vec3.Vector
-	dir               vec3.Vector
-	w, h              int
-	exploding         bool
-	exploded          bool
-	explosionCount    float64
-	explosionInterval float64
-	explosionTexture  *ebiten.Image
+	bubbleSpr  *sprite.Sprite
+	pos        vec3.Vector
+	dir        vec3.Vector
+	w, h       float64
+	exploding  bool
+	exploded   bool
+	explodeSpr *sprite.Sprite
 }
 
-func newBubble(tex *ebiten.Image, pos, dir vec3.Vector, explosionTexture *ebiten.Image) *bubble {
-	w, h := tex.Size()
-	return &bubble{tex, pos, dir, w, h, false, false, 0, 50.0, explosionTexture}
+func newBubble(bubbleSpr *sprite.Sprite, pos, dir vec3.Vector, explodeSpr *sprite.Sprite) *bubble {
+	w := bubbleSpr.GetWidth()
+	h := bubbleSpr.GetHeight()
+	return &bubble{bubbleSpr, pos, dir, w, h, false, false, explodeSpr}
 }
 
-func (bubble *bubble) getScale() float32 {
+func (bubble *bubble) getScale() float64 {
 	return (bubble.pos.Z/200 + 1) / 2
 }
 
-func (bubble *bubble) getCircle() (x, y, r float32) {
+func (bubble *bubble) getCircle() (x, y, r float64) {
 	x = bubble.pos.X
 	y = bubble.pos.Y
-	r = float32(bubble.w) / 2 * bubble.getScale()
+	r = bubble.w / 2 * bubble.getScale()
 	return x, y, r
 }
 
 func (bubble *bubble) Draw(screen *ebiten.Image) {
-	scale := bubble.getScale()
-	newW := int32(float32(bubble.w) * scale)
-	newH := int32(float32(bubble.h) * scale)
-	x := float64(bubble.pos.X - float32(newW)/2)
-	y := float64(bubble.pos.Y - float32(newH)/2)
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(float64(scale), float64(scale))
-	op.GeoM.Translate(x, y)
-	screen.DrawImage(bubble.tex, op)
-
+	scale := float64(bubble.getScale())
+	bubble.bubbleSpr.Zoom(scale)
+	bubble.bubbleSpr.Position(float64(bubble.pos.X), float64(bubble.pos.Y))
+	bubble.bubbleSpr.Draw(screen)
 	if bubble.exploding {
-		numAnimations := 16
-		animationIndex := numAnimations - 1 - int(bubble.explosionCount/bubble.explosionInterval)
-		animationX := animationIndex % 4
-		animationY := 64 * ((animationIndex - animationX) / 4)
-		animationX *= 64
-		rect := image.Rect(int(animationX), int(animationY), animationX+64, animationY+64)
-		op.GeoM.Reset()
-		op.SourceRect = &rect
-		op.GeoM.Scale(float64(scale), float64(scale))
-		op.GeoM.Translate(x, y)
-		screen.DrawImage(bubble.explosionTexture, op)
+		bubble.explodeSpr.Position(float64(bubble.pos.X), float64(bubble.pos.Y))
+		bubble.explodeSpr.Draw(screen)
 	}
 }
 
 func loadBubbles(numBubbles int) []*bubble {
-	explosionTexture := loadFromFile("assets/explosion.png")
+	explodeSpr := sprite.NewSprite()
+	explodeSpr.AddAnimation("default", "assets/explosion1.png", 1000, 5, ebiten.FilterDefault)
+	explodeSpr.CenterCoordonnates = true
+	explodeSpr.Start()
 	bubbleStrs := []string{"assets/mm_blue.png", "assets/mm_brown.png", "assets/mm_green.png", "assets/mm_orange.png", "assets/mm_purple.png", "assets/mm_red.png", "assets/mm_teal.png", "assets/mm_yellow.png"}
-	bubbleTextures := make([]*ebiten.Image, len(bubbleStrs))
+	bubblesprites := make([]*sprite.Sprite, len(bubbleStrs))
 
 	for i, bstr := range bubbleStrs {
-		bubbleTextures[i] = loadFromFile(bstr)
+		bubblesprites[i] = sprite.NewSprite()
+		bubblesprites[i].AddAnimation("default", bstr, 1, 1, ebiten.FilterDefault)
+		bubblesprites[i].CenterCoordonnates = true
 	}
 	bubbles := make([]*bubble, numBubbles)
 	for i := range bubbles {
-		tex := bubbleTextures[i%8]
-		pos := vec3.Vector{X: rand.Float32() * float32(WinWidth), Y: rand.Float32() * float32(WinHeight), Z: rand.Float32() * float32(WinDepth)}
-		dir := vec3.Vector{X: rand.Float32()*.5 - .25, Y: rand.Float32()*.5 - .25, Z: rand.Float32() * .25}
-		bubbles[i] = newBubble(tex, pos, dir, explosionTexture)
+		tex := bubblesprites[i%8]
+		pos := vec3.Vector{X: rand.Float64() * float64(WinWidth), Y: rand.Float64() * float64(WinHeight), Z: rand.Float64() * float64(WinDepth)}
+		dir := vec3.Vector{X: rand.Float64()*.5 - .25, Y: rand.Float64()*.5 - .25, Z: rand.Float64() * .25}
+		bubbles[i] = newBubble(tex, pos, dir, explodeSpr)
 	}
 	return bubbles
 }
@@ -168,18 +157,15 @@ func (ui *UI2d) TextOut(screen *ebiten.Image, str string, x, y int, clr color.Co
 	// Draw the sample text
 	text.Draw(screen, str, ui.bigFont, x, y, clr)
 }
-
 func (ui *UI2d) UpdateBubbles(elapsedTime float64) {
 
-	numAnimations := 16
 	bubbleClicked := false
 	bubbleExploded := false
 	for i := len(ui.Bubbles) - 1; i >= 0; i-- {
 		bubble := ui.Bubbles[i]
 		if bubble.exploding {
-			bubble.explosionCount += float64(elapsedTime)
-			animationIndex := numAnimations - 1 - int(bubble.explosionCount/bubble.explosionInterval)
-			if animationIndex < 0 {
+			currentAnim := bubble.explodeSpr.Animations[bubble.explodeSpr.CurrentAnimation]
+			if currentAnim.CurrentStep+1 >= currentAnim.Steps {
 				bubble.exploding = false
 				bubble.exploded = true
 				bubbleExploded = true
@@ -188,26 +174,25 @@ func (ui *UI2d) UpdateBubbles(elapsedTime float64) {
 		if !bubbleClicked && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 			x, y, r := bubble.getCircle()
 			mouseX, mouseY := ebiten.CursorPosition()
-			xDiff := float32(mouseX) - x
-			yDiff := float32(mouseY) - y
-			dist := float32(math.Sqrt(float64(xDiff*xDiff + yDiff*yDiff)))
+			xDiff := float64(mouseX) - x
+			yDiff := float64(mouseY) - y
+			dist := math.Sqrt(xDiff*xDiff + yDiff*yDiff)
 			if dist < r {
 				bubbleClicked = true
 				bubble.exploding = true
-				bubble.explosionCount = 0
 			}
 		}
-		p := bubble.pos.Add(bubble.dir.Mul2(float32(elapsedTime)))
-		if p.X < 0 || p.X > float32(WinWidth) {
+		p := bubble.pos.Add(bubble.dir.Mul2(elapsedTime))
+		if p.X < 0 || p.X > float64(WinWidth) {
 			bubble.dir.X = -bubble.dir.X
 		}
-		if p.Y < 0 || p.Y > float32(WinHeight) {
+		if p.Y < 0 || p.Y > float64(WinHeight) {
 			bubble.dir.Y = -bubble.dir.Y
 		}
-		if p.Z < 0 || p.Z > float32(WinDepth) {
+		if p.Z < 0 || p.Z > float64(WinDepth) {
 			bubble.dir.Z = -bubble.dir.Z
 		}
-		bubble.pos = bubble.pos.Add(bubble.dir.Mul2(float32(elapsedTime)))
+		bubble.pos = bubble.pos.Add(bubble.dir.Mul2(elapsedTime))
 	}
 	if bubbleExploded {
 		filteredBubbles := ui.Bubbles[0:0]

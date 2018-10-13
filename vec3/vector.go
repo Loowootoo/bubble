@@ -6,7 +6,7 @@ import (
 )
 
 type Vector struct {
-	X, Y, Z float32
+	X, Y, Z float64
 }
 
 //向量常數值
@@ -22,22 +22,22 @@ var (
 	MinusOne = Vector{-1, -1, -1}
 )
 
-func Roundf(val float32, places int) float32 {
+func Roundf(val float64, places int) float64 {
 	if places < 0 {
 		panic("places should be >= 0")
 	}
 
-	factor := float32(math.Pow10(places))
+	factor := math.Pow10(places)
 	val = val * factor
-	tmp := float32(int(val))
+	tmp := float64(int(val))
 	return tmp / factor
 }
 
-func Lerpf(from, to float32, t float32) float32 {
+func Lerpf(from, to float64, t float64) float64 {
 	return from + ((to - from) * t)
 }
 
-func LerpAngle(from, to float32, t float32) float32 {
+func LerpAngle(from, to float64, t float64) float64 {
 	for to-from > 180 {
 		from += 360
 	}
@@ -51,11 +51,11 @@ func (v *Vector) String() string {
 	return fmt.Sprintf("(%f,%f,%f)", v.X, v.Y, v.Z)
 }
 
-func NewVector2(x, y float32) Vector {
+func NewVector2(x, y float64) Vector {
 	return Vector{x, y, 1}
 }
 
-func NewVector3(x, y, z float32) Vector {
+func NewVector3(x, y, z float64) Vector {
 	return Vector{x, y, z}
 }
 
@@ -71,14 +71,14 @@ func (v *Vector) Mul(vect Vector) Vector {
 	return Vector{v.X * vect.X, v.Y * vect.Y, v.Z * vect.Z}
 }
 
-func (v *Vector) Mul2(vect float32) Vector {
+func (v *Vector) Mul2(vect float64) Vector {
 	return Vector{v.X * vect, v.Y * vect, v.Z * vect}
 }
 
-func (v *Vector) Distance(vect Vector) float32 {
+func (v *Vector) Distance(vect Vector) float64 {
 	x := v.X - vect.X
 	y := v.Y - vect.Y
-	return float32(math.Sqrt(float64(x*x + y*y)))
+	return math.Sqrt(float64(x*x + y*y))
 }
 
 func (v *Vector) Div(vect Vector) Vector {
@@ -108,11 +108,11 @@ func (v *Vector) fixAngle() {
 	}
 }
 
-func (v *Vector) Length() float32 {
-	return float32(math.Sqrt(float64(v.X*v.X + v.Y*v.Y)))
+func (v *Vector) Length() float64 {
+	return math.Sqrt(v.X*v.X + v.Y*v.Y)
 }
 
-func Lerp(from, to Vector, t float32) Vector {
+func Lerp(from, to Vector, t float64) Vector {
 	return NewVector2(from.X+((to.X-from.X)*t), from.Y+((to.Y-from.Y)*t))
 }
 
