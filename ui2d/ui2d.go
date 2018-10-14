@@ -219,7 +219,7 @@ func (ui *UI2d) DrawTextWithShadow(rt *ebiten.Image, str string, x, y, scale int
 	offsetY := fontBaseSize * scale
 	for _, line := range strings.Split(str, "\n") {
 		y += offsetY
-		text.Draw(rt, line, ui.normalFont, x+1, y+1, shadowColor)
+		text.Draw(rt, line, ui.normalFont, x+2, y+2, shadowColor)
 		text.Draw(rt, line, ui.normalFont, x, y, clr)
 	}
 }
