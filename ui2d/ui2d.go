@@ -1,13 +1,14 @@
 package ui2d
 
 import (
-	"Loowootoo/bubble/assets/fonts"
-	"Loowootoo/bubble/vec3"
 	"image/color"
 	"image/png"
 	"log"
 	"os"
 	"strings"
+
+	"bubble/assets/fonts"
+	"bubble/vec3"
 
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
@@ -17,10 +18,10 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/text"
-	"github.com/ryosama/go-sprite"
+	sprite "github.com/ryosama/go-sprite"
 )
 
-const WinWidth, WinHeight, WinDepth int32 = 800, 600, 100
+const WinWidth, WinHeight, WinDepth int32 = 800, 480, 100
 
 func loadFromFile(fileName string) *ebiten.Image {
 	inFile, err := os.Open(fileName)

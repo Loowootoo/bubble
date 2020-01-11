@@ -1,11 +1,12 @@
 package main
 
 import (
-	"Loowootoo/bubble/ui2d"
 	"image/color"
 	"math/rand"
 	"strings"
 	"time"
+
+	"bubble/ui2d"
 
 	"github.com/hajimehoshi/ebiten"
 )
