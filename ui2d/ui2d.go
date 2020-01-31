@@ -18,7 +18,8 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/text"
-	sprite "github.com/ryosama/go-sprite"
+	"bubble/sprite"
+
 )
 
 const WinWidth, WinHeight, WinDepth int32 = 800, 480, 100
@@ -129,6 +130,7 @@ func loadBubbles(numBubbles int) []*bubble {
 	explodeSpr := sprite.NewSprite()
 	explodeSpr.AddAnimation("default", "assets/explosion1.png", 1000, 5, ebiten.FilterDefault)
 	explodeSpr.CenterCoordonnates = true
+	explodeSpr.Animated = true
 	explodeSpr.Start()
 	bubbleStrs := []string{"assets/mm_blue.png", "assets/mm_brown.png", "assets/mm_green.png", "assets/mm_orange.png", "assets/mm_purple.png", "assets/mm_red.png", "assets/mm_teal.png", "assets/mm_yellow.png"}
 	bubblesprites := make([]*sprite.Sprite, len(bubbleStrs))

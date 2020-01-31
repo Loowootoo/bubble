@@ -1,6 +1,6 @@
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
-github.com/Loowootoo/bubble v0.0.0-20181014144558-0ed917c4247d h1:V/WlIoisWqPTFioXCQjbv1MIkzNtcY6g5zrBjN2RPjU=
-github.com/Loowootoo/bubble v0.0.0-20181014144558-0ed917c4247d/go.mod h1:GggsDM5L2k3TK4XbsoNvP0/6sIoje2Hz2gp2ZDGUkgc=
+github.com/Loowootoo/go-sprite v0.0.0-20180924081212-e91948c3c0ed h1:FZqflX/Px0ZMfGpIfqIh35o8mgLAiUFPHowjemWZ5F8=
+github.com/Loowootoo/go-sprite v0.0.0-20180924081212-e91948c3c0ed/go.mod h1:TiaPHXrDVhYuGUgcGbk5uJfFA6wuBqfr60CFOWa49lE=
 github.com/go-gl/glfw v0.0.0-20190409004039-e6da0acd62b1 h1:QbL/5oDUmRBzO9/Z7Seo6zf912W/a6Sr4Eu0G/3Jho0=
 github.com/go-gl/glfw v0.0.0-20190409004039-e6da0acd62b1/go.mod h1:vR7hzQXu2zJy9AVAgeJqvqgH9Q5CA+iKCZ2gyEVpxRU=
 github.com/gofrs/flock v0.7.1 h1:DP+LD/t0njgoPBvT5MJLeliUIVQR03hiKR6vezdwHlc=
@@ -23,8 +23,6 @@ github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
 github.com/pkg/browser v0.0.0-20180916011732-0a3d74bf9ce4/go.mod h1:4OwLy04Bl9Ef3GJJCoec+30X3LQs/0/m4HFRt/2LUSA=
-github.com/ryosama/go-sprite v0.0.0-20180924081212-e91948c3c0ed h1:Bvtbp0xEHwJ14OSv9qYCQxjb+oeXSAN6yoC28QLMaJw=
-github.com/ryosama/go-sprite v0.0.0-20180924081212-e91948c3c0ed/go.mod h1:l0hZUqMbiAj0mQhm73X+kFK/PENWlmWEJywDZZr656s=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20190510104115-cbcb75029529/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=
 golang.org/x/exp v0.0.0-20190306152737-a1d7652674e8/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
