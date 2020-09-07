@@ -16,10 +16,9 @@ import (
 	"math"
 	"math/rand"
 
+	"github.com/Loowootoo/go-sprite"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/text"
-	"bubble/sprite"
-
 )
 
 const WinWidth, WinHeight, WinDepth int32 = 800, 480, 100
@@ -90,15 +89,15 @@ func NewUI2d() *UI2d {
 
 type bubble struct {
 	bubbleSpr  *sprite.Sprite
-	pos        vec3.Vector
-	dir        vec3.Vector
+	pos        vec3.Vec2
+	dir        vec3.Vec2
 	w, h       float64
 	exploding  bool
 	exploded   bool
 	explodeSpr *sprite.Sprite
 }
 
-func newBubble(bubbleSpr *sprite.Sprite, pos, dir vec3.Vector, explodeSpr *sprite.Sprite) *bubble {
+func newBubble(bubbleSpr *sprite.Sprite, pos, dir vec3.Vec2, explodeSpr *sprite.Sprite) *bubble {
 	w := bubbleSpr.GetWidth()
 	h := bubbleSpr.GetHeight()
 	return &bubble{bubbleSpr, pos, dir, w, h, false, false, explodeSpr}
@@ -143,8 +142,8 @@ func loadBubbles(numBubbles int) []*bubble {
 	bubbles := make([]*bubble, numBubbles)
 	for i := range bubbles {
 		tex := bubblesprites[i%8]
-		pos := vec3.Vector{X: rand.Float64() * float64(WinWidth), Y: rand.Float64() * float64(WinHeight), Z: rand.Float64() * float64(WinDepth)}
-		dir := vec3.Vector{X: rand.Float64()*.5 - .25, Y: rand.Float64()*.5 - .25, Z: rand.Float64() * .25}
+		pos := vec3.Vec2{X: rand.Float64() * float64(WinWidth), Y: rand.Float64() * float64(WinHeight), Z: rand.Float64() * float64(WinDepth)}
+		dir := vec3.Vec2{X: rand.Float64()*.5 - .25, Y: rand.Float64()*.5 - .25, Z: rand.Float64() * .25}
 		bubbles[i] = newBubble(tex, pos, dir, explodeSpr)
 	}
 	return bubbles
