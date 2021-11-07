@@ -1,24 +1,21 @@
 package ui2d
 
 import (
+	"github.com/Loowootoo/bubble/assets/fonts"
 	"image/color"
 	"image/png"
 	"log"
 	"os"
 	"strings"
 
-	"bubble/assets/fonts"
-	"bubble/vec3"
-
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
 
-	"math"
+	//	"math"
 	"math/rand"
 
-	"github.com/Loowootoo/go-sprite"
-	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/text"
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/text"
 )
 
 const WinWidth, WinHeight, WinDepth int32 = 800, 480, 100
@@ -51,7 +48,7 @@ func loadFromFile(fileName string) *ebiten.Image {
 			bIndex++
 		}
 	}
-	tex, err := ebiten.NewImage(w, h, ebiten.FilterNearest)
+	tex := ebiten.NewImage(w, h)
 	if err != nil {
 		panic(err)
 	}
@@ -60,14 +57,18 @@ func loadFromFile(fileName string) *ebiten.Image {
 }
 
 type UI2d struct {
-	Bubbles    []*bubble
-	Background *ebiten.Image
-	normalFont font.Face
-	bigFont    font.Face
+	Bubbles         []*Sprite
+	Bubbleexp       *Sprite
+	Background      *ebiten.Image
+	normalFont      font.Face
+	bigFont         font.Face
+	bubbleExploded  bool
+	bubbleExploding bool
 }
 
 func NewUI2d() *UI2d {
 	Bubbles := loadBubbles(20)
+	Bubbleexp := loadBubbleexp()
 	Background := loadFromFile("assets/moon.png")
 	tt, err := truetype.Parse(fonts.Water_ttf)
 	if err != nil {
@@ -84,67 +85,40 @@ func NewUI2d() *UI2d {
 		DPI:     dpi,
 		Hinting: font.HintingFull,
 	})
-	return &UI2d{Bubbles, Background, normalFont, bigFont}
+	return &UI2d{Bubbles, Bubbleexp, Background, normalFont, bigFont, false, false}
 }
 
-type bubble struct {
-	bubbleSpr  *sprite.Sprite
-	pos        vec3.Vec2
-	dir        vec3.Vec2
-	w, h       float64
-	exploding  bool
-	exploded   bool
-	explodeSpr *sprite.Sprite
+func loadBubbleexp() *Sprite {
+	Spr := NewSprite(float64(WinWidth), float64(WinHeight), float64(WinDepth))
+	Spr.AddAnimFrameFromFile("default", "assets/explosion1.png", 1000, 5)
+	Spr.CenterCoordonnates = true
+	Spr.Animated = true
+	Spr.Start()
+	return Spr
 }
 
-func newBubble(bubbleSpr *sprite.Sprite, pos, dir vec3.Vec2, explodeSpr *sprite.Sprite) *bubble {
-	w := bubbleSpr.GetWidth()
-	h := bubbleSpr.GetHeight()
-	return &bubble{bubbleSpr, pos, dir, w, h, false, false, explodeSpr}
-}
-
-func (bubble *bubble) getScale() float64 {
-	return (bubble.pos.Z/200 + 1) / 2
-}
-
-func (bubble *bubble) getCircle() (x, y, r float64) {
-	x = bubble.pos.X
-	y = bubble.pos.Y
-	r = bubble.w / 2 * bubble.getScale()
-	return x, y, r
-}
-
-func (bubble *bubble) Draw(screen *ebiten.Image) {
-	scale := float64(bubble.getScale())
-	bubble.bubbleSpr.Zoom(scale)
-	bubble.bubbleSpr.Position(float64(bubble.pos.X), float64(bubble.pos.Y))
-	bubble.bubbleSpr.Draw(screen)
-	if bubble.exploding {
-		bubble.explodeSpr.Position(float64(bubble.pos.X), float64(bubble.pos.Y))
-		bubble.explodeSpr.Draw(screen)
+func (ui *UI2d) Draw(screen *ebiten.Image) {
+	ui.DrawBackground(screen)
+	for i, line := range strings.Split(waterText, "\n") {
+		ui.DrawTextWithShadowCenter(screen, line, 10, 40+i*30, 1, color.White, int(WinWidth))
+	}
+	for i := 0; i < len(ui.Bubbles); i++ {
+		ui.Bubbles[i].Draw(screen)
 	}
 }
 
-func loadBubbles(numBubbles int) []*bubble {
-	explodeSpr := sprite.NewSprite()
-	explodeSpr.AddAnimation("default", "assets/explosion1.png", 1000, 5, ebiten.FilterDefault)
-	explodeSpr.CenterCoordonnates = true
-	explodeSpr.Animated = true
-	explodeSpr.Start()
+func loadBubbles(numBubbles int) []*Sprite {
 	bubbleStrs := []string{"assets/mm_blue.png", "assets/mm_brown.png", "assets/mm_green.png", "assets/mm_orange.png", "assets/mm_purple.png", "assets/mm_red.png", "assets/mm_teal.png", "assets/mm_yellow.png"}
-	bubblesprites := make([]*sprite.Sprite, len(bubbleStrs))
-
-	for i, bstr := range bubbleStrs {
-		bubblesprites[i] = sprite.NewSprite()
-		bubblesprites[i].AddAnimation("default", bstr, 1, 1, ebiten.FilterDefault)
-		bubblesprites[i].CenterCoordonnates = true
-	}
-	bubbles := make([]*bubble, numBubbles)
-	for i := range bubbles {
-		tex := bubblesprites[i%8]
-		pos := vec3.Vec2{X: rand.Float64() * float64(WinWidth), Y: rand.Float64() * float64(WinHeight), Z: rand.Float64() * float64(WinDepth)}
-		dir := vec3.Vec2{X: rand.Float64()*.5 - .25, Y: rand.Float64()*.5 - .25, Z: rand.Float64() * .25}
-		bubbles[i] = newBubble(tex, pos, dir, explodeSpr)
+	var bstr string
+	bubbles := make([]*Sprite, numBubbles)
+	for i := 0; i < len(bubbles); i++ {
+		bstr = bubbleStrs[i%8]
+		bubbles[i] = NewSprite(float64(WinWidth), float64(WinHeight), float64(WinDepth))
+		bubbles[i].AddAnimFrameFromFile("default", bstr, 1, 1)
+		bubbles[i].CenterCoordonnates = true
+		bubbles[i].Pos = Vec3{X: rand.Float64() * float64(WinWidth), Y: rand.Float64() * float64(WinHeight), Z: rand.Float64() * float64(WinDepth)}
+		bubbles[i].Direction = Vec3{X: rand.Float64()*.5 - .25, Y: rand.Float64()*.5 - .25, Z: rand.Float64() * .25}
+		bubbles[i].Start()
 	}
 	return bubbles
 }
@@ -159,51 +133,9 @@ func (ui *UI2d) TextOut(screen *ebiten.Image, str string, x, y int, clr color.Co
 	// Draw the sample text
 	text.Draw(screen, str, ui.bigFont, x, y, clr)
 }
-func (ui *UI2d) UpdateBubbles(elapsedTime float64) {
-
-	bubbleClicked := false
-	bubbleExploded := false
+func (ui *UI2d) Update() {
 	for i := len(ui.Bubbles) - 1; i >= 0; i-- {
-		bubble := ui.Bubbles[i]
-		if bubble.exploding {
-			currentAnim := bubble.explodeSpr.Animations[bubble.explodeSpr.CurrentAnimation]
-			if currentAnim.CurrentStep+1 >= currentAnim.Steps {
-				bubble.exploding = false
-				bubble.exploded = true
-				bubbleExploded = true
-			}
-		}
-		if !bubbleClicked && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-			x, y, r := bubble.getCircle()
-			mouseX, mouseY := ebiten.CursorPosition()
-			xDiff := float64(mouseX) - x
-			yDiff := float64(mouseY) - y
-			dist := math.Sqrt(xDiff*xDiff + yDiff*yDiff)
-			if dist < r {
-				bubbleClicked = true
-				bubble.exploding = true
-			}
-		}
-		p := bubble.pos.Add(bubble.dir.Mul2(elapsedTime))
-		if p.X < 0 || p.X > float64(WinWidth) {
-			bubble.dir.X = -bubble.dir.X
-		}
-		if p.Y < 0 || p.Y > float64(WinHeight) {
-			bubble.dir.Y = -bubble.dir.Y
-		}
-		if p.Z < 0 || p.Z > float64(WinDepth) {
-			bubble.dir.Z = -bubble.dir.Z
-		}
-		bubble.pos = bubble.pos.Add(bubble.dir.Mul2(elapsedTime))
-	}
-	if bubbleExploded {
-		filteredBubbles := ui.Bubbles[0:0]
-		for _, bubble := range ui.Bubbles {
-			if !bubble.exploded {
-				filteredBubbles = append(filteredBubbles, bubble)
-			}
-		}
-		ui.Bubbles = filteredBubbles
+		ui.Bubbles[i].Update()
 	}
 }
 
@@ -237,3 +169,16 @@ func (ui *UI2d) DrawTextWithShadowRight(rt *ebiten.Image, str string, x, y, scal
 	x += width - w
 	ui.DrawTextWithShadow(rt, str, x, y, scale, clr)
 }
+
+var (
+	waterText = `
+明月幾時有，把酒問青天。
+不知天上宮闕，今夕是何年。
+我欲乘風歸去，又恐瓊樓玉宇，高處不勝寒。
+起舞弄清影，何似在人間。
+轉朱閣，低綺戶，照無眠。
+不應有恨，何事長向別時圓。
+人有悲歡離合，月有陰晴圓缺，此事古難全。
+但願人長久，千里共嬋娟。	
+`
+)
